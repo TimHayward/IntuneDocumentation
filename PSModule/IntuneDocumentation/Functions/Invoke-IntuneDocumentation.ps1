@@ -157,6 +157,9 @@ Function Invoke-IntuneDocumentation(){
         foreach($MAM in $MAMs){
             write-Log "App Protection Policy: $($MAM.displayName)"
             Add-WordText -FilePath $FullDocumentationPath -Heading Heading2 -Text $MAM.displayName
+            if($MAM.'@odata.type' -eq "#microsoft.graph.mdmWindowsInformationProtectionPolicy"){
+                $MAM.protectedApps = $MAM.protectedApps.displayName -join ", "
+            }
             Invoke-PrintTable -Properties $MAM.psobject.properties -TypeName $MAM.'@odata.type'
             if($MAM.'@odata.type' -eq "#microsoft.graph.iosManagedAppProtection"){
                 $MAMA = Get-MAM_iOS_Assignment -policyId $MAM.id
@@ -320,7 +323,7 @@ Function Invoke-IntuneDocumentation(){
         $VPPs = Get-IntuneVppToken -ErrorAction SilentlyContinue
         $APNs = Get-IntuneApplePushNotificationCertificate -ErrorAction SilentlyContinue
     } catch {
-
+        Write-Log "Failed to load AppleAPN or VPP information"
     }
     Add-WordText -FilePath $FullDocumentationPath -Heading Heading1 -Text "Apple Configurations"
     Add-WordText -FilePath $FullDocumentationPath -Heading Heading2 -Text "Apple Push Certificate"
